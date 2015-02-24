@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/PhoneProfilesHelper.iml" filepath="$PROJECT_DIR$/PhoneProfilesHelper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/phoneProfilesHelper/phoneProfilesHelper.iml" filepath="$PROJECT_DIR$/phoneProfilesHelper/phoneProfilesHelper.iml" />
+    </modules>
+  </component>
+</project>
+
