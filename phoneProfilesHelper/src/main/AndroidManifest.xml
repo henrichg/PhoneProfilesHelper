@@ -64,6 +64,16 @@
             </intent-filter>
         </receiver>
         
+        <receiver
+            android:name=".PPHeplerBroadcastReceiver"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="sk.henrichg.phoneprofileshelper.ACTION_SETPROFILEPREFERENCES"/>
+                <action android:name="sk.henrichg.phoneprofileshelper.ACTION_RADIOCHANGESTATE"/>
+            </intent-filter>
+        </receiver>
+
+        
     </application>
 
 </manifest>

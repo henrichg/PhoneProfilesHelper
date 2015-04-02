@@ -8,7 +8,7 @@ import android.os.IBinder;
 
 public class ReceiversService extends Service {
 
-	private final PPHeplerBroadcastReceiver receiver = new PPHeplerBroadcastReceiver();
+	//private final PPHeplerBroadcastReceiver receiver = new PPHeplerBroadcastReceiver();
 
 	public static boolean radioStateChange = false; 
 	
@@ -16,17 +16,19 @@ public class ReceiversService extends Service {
     public void onCreate()
 	{
 		SystemRoutines.logE("ReceiversService.onCreate", "xxx");
-		
+
+        /*
 		IntentFilter intentFilter1 = new IntentFilter();
 		intentFilter1.addAction(PPHeplerBroadcastReceiver.ACTION_SETPROFILEPREFERENCES);
 		intentFilter1.addAction(PPHeplerBroadcastReceiver.ACTION_RADIOCHANGESTATE);
 		registerReceiver(receiver, intentFilter1);
+		*/
 	}
 	 
 	@Override
     public void onDestroy()
 	{
-		unregisterReceiver(receiver);
+		//unregisterReceiver(receiver);
 		SystemRoutines.logE("ReceiversService.onDestroy", "xxx");
     }
 	 
