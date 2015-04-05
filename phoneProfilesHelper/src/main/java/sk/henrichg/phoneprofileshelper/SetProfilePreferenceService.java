@@ -462,7 +462,7 @@ public class SetProfilePreferenceService extends IntentService
 
 	private boolean canSetMobileData()
 	{
-		if (android.os.Build.VERSION.SDK_INT >= 21)
+		if (android.os.Build.VERSION.SDK_INT >= 22)
 		{
 		    Class<?> telephonyManagerClass;
 
@@ -470,9 +470,9 @@ public class SetProfilePreferenceService extends IntentService
 		            .getSystemService(Context.TELEPHONY_SERVICE);
 
 			try {
-			    telephonyManagerClass = Class.forName(telephonyManager.getClass().getName());
-			    Method getITelephonyMethod = telephonyManagerClass.getDeclaredMethod("getITelephony");
-			    getITelephonyMethod.setAccessible(true);
+                telephonyManagerClass = Class.forName(telephonyManager.getClass().getName());
+                Method getDataEnabledMethod = telephonyManagerClass.getDeclaredMethod("getDataEnabled");
+                getDataEnabledMethod.setAccessible(true);
 			    return true;
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
@@ -486,6 +486,30 @@ public class SetProfilePreferenceService extends IntentService
 			}
 		}
 		else
+        if (android.os.Build.VERSION.SDK_INT >= 21)
+        {
+            Class<?> telephonyManagerClass;
+
+            TelephonyManager telephonyManager = (TelephonyManager) context
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+
+            try {
+                telephonyManagerClass = Class.forName(telephonyManager.getClass().getName());
+                Method getITelephonyMethod = telephonyManagerClass.getDeclaredMethod("getITelephony");
+                getITelephonyMethod.setAccessible(true);
+                return true;
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                return false;
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+                return false;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        else
 		{
 			final ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 			
@@ -535,7 +559,8 @@ public class SetProfilePreferenceService extends IntentService
 				return false;
 			}
 		}
-		else
+        else
+        if (android.os.Build.VERSION.SDK_INT < 22)
 		{
 		    Method getDataEnabledMethod;
 		    Class<?> telephonyManagerClass;
@@ -574,8 +599,40 @@ public class SetProfilePreferenceService extends IntentService
 				e.printStackTrace();
 				return false;
 			}
-			
 		}
+        else
+        {
+            Method getDataEnabledMethod;
+            Class<?> telephonyManagerClass;
+
+            TelephonyManager telephonyManager = (TelephonyManager) context
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+
+            try {
+                telephonyManagerClass = Class.forName(telephonyManager.getClass().getName());
+                getDataEnabledMethod = telephonyManagerClass.getDeclaredMethod("getDataEnabled");
+                getDataEnabledMethod.setAccessible(true);
+
+                return (Boolean)getDataEnabledMethod.invoke(telephonyManager);
+
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                return false;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                return false;
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+                return false;
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+                return false;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
 	}
 	
 	private void setMobileData(boolean enable)
@@ -631,7 +688,8 @@ public class SetProfilePreferenceService extends IntentService
 				}
 			}
 		}
-		else
+        else
+        if (android.os.Build.VERSION.SDK_INT < 22)
 		{
 		    Method dataConnSwitchmethod;
 		    Class<?> telephonyManagerClass;
@@ -675,6 +733,34 @@ public class SetProfilePreferenceService extends IntentService
 			}
 			    
 		}
+        else
+        {
+            Method setDataEnabledMethod;
+            Class<?> telephonyManagerClass;
+
+            TelephonyManager telephonyManager = (TelephonyManager) context
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+
+            try {
+                telephonyManagerClass = Class.forName(telephonyManager.getClass().getName());
+                setDataEnabledMethod = telephonyManagerClass.getDeclaredMethod("setDataEnabled", Boolean.TYPE);
+                setDataEnabledMethod.setAccessible(true);
+
+                setDataEnabledMethod.invoke(telephonyManager, enable);
+
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
 		
 	}
 	
@@ -685,7 +771,7 @@ public class SetProfilePreferenceService extends IntentService
 		{
 			String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
     		String newSet;
-    		if (provider == "")
+    		if (provider.equals(""))
     			newSet = LocationManager.GPS_PROVIDER;
     		else
     			newSet = String.format("%s,%s", provider, LocationManager.GPS_PROVIDER);
