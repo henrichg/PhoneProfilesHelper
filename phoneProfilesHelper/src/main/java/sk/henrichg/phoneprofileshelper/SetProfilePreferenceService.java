@@ -34,7 +34,8 @@ public class SetProfilePreferenceService extends IntentService
 	int WifiChange = 0;
 	int bluetoothChange = 0;
 	int mobileDataChange = 0;
-	
+	int WifiAPChange = 0;
+
 	public static final String PROCEDURE = "procedure";
 	
 	public static final String PROCEDURE_RADIO_CHANGE = "radioChange";
@@ -45,14 +46,16 @@ public class SetProfilePreferenceService extends IntentService
 	public static final String WIFI_CHANGE = "WiFiChange";
 	public static final String BLUETOOTH_CHANGE = "bluetoothChange";
 	public static final String MOBILE_DATA_CHANGE = "mobileDataChange";
-	
+	public static final String WIFI_AP_CHANGE = "WiFiAPChange";
+
 	private static final String PREF_PROFILE_DEVICE_GPS = "prf_pref_deviceGPS";
 	private static final String PREF_PROFILE_DEVICE_AIRPLANE_MODE = "prf_pref_deviceAirplaneMode";
 	private static final String PREF_PROFILE_DEVICE_NFC = "prf_pref_deviceNFC";
 	private static final String PREF_PROFILE_DEVICE_WIFI = "prf_pref_deviceWiFi";
 	private static final String PREF_PROFILE_DEVICE_BLUETOOTH = "prf_pref_deviceBluetooth";
 	private static final String PREF_PROFILE_DEVICE_MOBILE_DATA = "prf_pref_deviceMobileData";
-	
+	private static final String PREF_PROFILE_DEVICE_WIFI_AP = "prf_pref_deviceWiFiAP";
+
 	// for synchronization between wifi/bluetooth scanner, local radio changes and PPHelper radio changes
 	static final String RADIO_CHANGE_PREFS_NAME = "sk.henrichg.phoneprofiles.radio_change"; 
 	static final String PREF_RADIO_CHANGE_STATE = "sk.henrichg.phoneprofiles.radioChangeState";
@@ -82,6 +85,7 @@ public class SetProfilePreferenceService extends IntentService
 			WifiChange = intent.getIntExtra(WIFI_CHANGE, 0);
 			bluetoothChange = intent.getIntExtra(BLUETOOTH_CHANGE, 0);
 			mobileDataChange = intent.getIntExtra(MOBILE_DATA_CHANGE, 0);
+			WifiAPChange = intent.getIntExtra(WIFI_AP_CHANGE, 0);
 
 			SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","GPSChange="+GPSChange);
 			SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","airplaneModeChange="+airplaneModeChange);
@@ -89,7 +93,8 @@ public class SetProfilePreferenceService extends IntentService
 			SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","WifiChange="+WifiChange);
 			SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","bluetoothChange="+bluetoothChange);
 			SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","mobileDataChange="+mobileDataChange);
-			
+			SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","WifiAPChange="+WifiAPChange);
+
 			executeForRadios();
 		}
 		
@@ -384,6 +389,13 @@ public class SetProfilePreferenceService extends IntentService
 				// device ma nfc
 				featurePresented = true;
 			}
+		}
+		else
+		if (preferenceKey.equals(PREF_PROFILE_DEVICE_WIFI_AP))
+		{
+			if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI))
+				// device ma Wifi
+				featurePresented = true;
 		}
 		else
 			featurePresented = true;

@@ -35,6 +35,7 @@ public class PPHeplerBroadcastReceiver extends WakefulBroadcastReceiver {
 				int WifiChange = intent.getIntExtra(SetProfilePreferenceService.WIFI_CHANGE, 0);
 				int bluetoothChange = intent.getIntExtra(SetProfilePreferenceService.BLUETOOTH_CHANGE, 0);
 				int mobileDataChange = intent.getIntExtra(SetProfilePreferenceService.MOBILE_DATA_CHANGE, 0);
+				int WifiAPChange = intent.getIntExtra(SetProfilePreferenceService.WIFI_AP_CHANGE, 0);
 
 				SystemRoutines.logE("SetProfilePreferenceBroadcastReceiver.onReceive","GPSChange="+GPSChange);
 				SystemRoutines.logE("SetProfilePreferenceBroadcastReceiver.onReceive","airplaneModeChange="+airplaneModeChange);
@@ -42,12 +43,14 @@ public class PPHeplerBroadcastReceiver extends WakefulBroadcastReceiver {
 				SystemRoutines.logE("SetProfilePreferenceBroadcastReceiver.onReceive","WifiChange="+WifiChange);
 				SystemRoutines.logE("SetProfilePreferenceBroadcastReceiver.onReceive","bluetoothChange="+bluetoothChange);
 				SystemRoutines.logE("SetProfilePreferenceBroadcastReceiver.onReceive","mobileDataChange="+mobileDataChange);
+				SystemRoutines.logE("SetProfilePreferenceBroadcastReceiver.onReceive","WifiAPChange="+WifiAPChange);
 				serviceIntent.putExtra(SetProfilePreferenceService.GPS_CHANGE, GPSChange);
 				serviceIntent.putExtra(SetProfilePreferenceService.AIRPLANE_MODE_CHANGE, airplaneModeChange);
 				serviceIntent.putExtra(SetProfilePreferenceService.NFC_CHANGE, NFCChange);
 				serviceIntent.putExtra(SetProfilePreferenceService.WIFI_CHANGE, WifiChange);
 				serviceIntent.putExtra(SetProfilePreferenceService.BLUETOOTH_CHANGE, bluetoothChange);
 				serviceIntent.putExtra(SetProfilePreferenceService.MOBILE_DATA_CHANGE, mobileDataChange);
+				serviceIntent.putExtra(SetProfilePreferenceService.WIFI_AP_CHANGE, WifiAPChange);
 			}
 			startWakefulService(context, serviceIntent);
 		}		
