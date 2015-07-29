@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="sk.henrichg.phoneprofileshelper"
-    android:versionCode="50"
+    android:versionCode="51"
     android:versionName="1.0" >
 
 <!--
@@ -67,7 +67,8 @@
         
         <receiver
             android:name=".PPHeplerBroadcastReceiver"
-            android:enabled="true" >
+            android:enabled="true"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="sk.henrichg.phoneprofileshelper.ACTION_SETPROFILEPREFERENCES"/>
                 <action android:name="sk.henrichg.phoneprofileshelper.ACTION_RADIOCHANGESTATE"/>
