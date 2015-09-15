@@ -21,41 +21,41 @@ import android.util.Log;
 
 public class SystemRoutines {
 
-	public static boolean logIntoLogCat = true;
-	public static boolean logIntoFile = false;
-	private static boolean rootToolsDebug = false;
-	public static String logFilterTags = "BootUpReceiver|"+
-			                             "ReceiversService|"+
-										 "SetProfilePreferenceBroadcastReceiver|"+
-			                             "SetProfilePreferenceService";
-	
-	public static final String EXPORT_PATH = "/PhoneProfilesHelper";
-	public static final String LOG_FILENAME = "log.txt";
-	
-	static boolean isSystemApp(Context context)
-	{
-		ApplicationInfo ai = context.getApplicationInfo();
-		
-		if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-		{
-			//Log.d(TAG, "isSystemApp==true");
-			return true;
-		}
-		return false;
-	}
-	
-	static boolean hasWriteSecurePermission(Context context)
-	{
-	    String permission = Manifest.permission.WRITE_SECURE_SETTINGS;
-	    int res = context.checkCallingOrSelfPermission(permission);
-	    return (res == PackageManager.PERMISSION_GRANTED);            
-	}
+    public static boolean logIntoLogCat = false;
+    public static boolean logIntoFile = false;
+    private static boolean rootToolsDebug = false;
+    public static String logFilterTags = "BootUpReceiver|"+
+                                         "ReceiversService|"+
+                                         "SetProfilePreferenceBroadcastReceiver|"+
+                                         "SetProfilePreferenceService";
+
+    public static final String EXPORT_PATH = "/PhoneProfilesHelper";
+    public static final String LOG_FILENAME = "log.txt";
+
+    static boolean isSystemApp(Context context)
+    {
+        ApplicationInfo ai = context.getApplicationInfo();
+
+        if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+        {
+            //Log.d(TAG, "isSystemApp==true");
+            return true;
+        }
+        return false;
+    }
+
+    static boolean hasWriteSecurePermission(Context context)
+    {
+        String permission = Manifest.permission.WRITE_SECURE_SETTINGS;
+        int res = context.checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
     
-	static private boolean isSELinuxEnforcingChecked = false;
-	static private boolean isSELinuxEnforcing = false;
-	//static private String suVersion = null;
-	//static private boolean suVersionChecked = false;
-	
+    static private boolean isSELinuxEnforcingChecked = false;
+    static private boolean isSELinuxEnforcing = false;
+    //static private String suVersion = null;
+    //static private boolean suVersionChecked = false;
+
     /**
      * Detect if SELinux is set to enforcing, caches result
      * 
@@ -64,8 +64,8 @@ public class SystemRoutines {
      */
     public static boolean isSELinuxEnforcing()
     {
-    	RootTools.debugMode = rootToolsDebug;
-    	
+        RootTools.debugMode = rootToolsDebug;
+
         if (!isSELinuxEnforcingChecked)
         {
             boolean enforcing = false;
@@ -103,7 +103,7 @@ public class SystemRoutines {
             
         }
         
-		logE("GlobalData.isSELinuxEnforcing", "isSELinuxEnforcing="+isSELinuxEnforcing);
+        logE("GlobalData.isSELinuxEnforcing", "isSELinuxEnforcing="+isSELinuxEnforcing);
         
         return isSELinuxEnforcing;
     }
@@ -111,41 +111,41 @@ public class SystemRoutines {
     /*
     public static String getSELinuxEnforceCommand(String command, Shell.ShellContext context)
     {
-    	if ((suVersion != null) && suVersion.contains("SUPERSU"))
-    		return "su --context " + context.getValue() + " -c \"" + command + "\"  < /dev/null";
-    	else
-    		return command;
+        if ((suVersion != null) && suVersion.contains("SUPERSU"))
+            return "su --context " + context.getValue() + " -c \"" + command + "\"  < /dev/null";
+        else
+            return command;
     }
 
     public static String getSUVersion()
     {
-    	if (!suVersionChecked)
-    	{
-	    	Command command = new Command(0, false, "su -v")
-	    	{
-	    		@Override
-	    		public void commandOutput(int id, String line) {
-	    			Log.e("GlobalData.getSUVersion","version="+line);
-	    			suVersion = line;
-	    			
-	    			super.commandOutput(id, line);
-	    		}
-	    	}
-	    	;
-			try {
-				RootTools.getShell(false).add(command);
-				commandWait(command);
-				//RootTools.closeAllShells();
-    			suVersionChecked = true;
-			} catch (Exception e) {
-				Log.e("GlobalData.getSUVersion", "Error on run su");
-			}
-    	}
-    	return suVersion;
+        if (!suVersionChecked)
+        {
+            Command command = new Command(0, false, "su -v")
+            {
+                @Override
+                public void commandOutput(int id, String line) {
+                    Log.e("GlobalData.getSUVersion","version="+line);
+                    suVersion = line;
+
+                    super.commandOutput(id, line);
+                }
+            }
+            ;
+            try {
+                RootTools.getShell(false).add(command);
+                commandWait(command);
+                //RootTools.closeAllShells();
+                suVersionChecked = true;
+            } catch (Exception e) {
+                Log.e("GlobalData.getSUVersion", "Error on run su");
+            }
+        }
+        return suVersion;
     }
     
     
-	private static void commandWait(Command cmd) throws Exception {
+    private static void commandWait(Command cmd) throws Exception {
         int waitTill = 50;
         int waitTillMultiplier = 2;
         int waitTillLimit = 3200; //7 tries, 6350 msec
@@ -168,129 +168,129 @@ public class SystemRoutines {
     }
     */    
     
-	//--------------------------------------------------------------
-	
-	static private void resetLog()
-	{
-		File sd = Environment.getExternalStorageDirectory();
-		File exportDir = new File(sd, EXPORT_PATH);
-		if (!(exportDir.exists() && exportDir.isDirectory()))
-			exportDir.mkdirs();
-		
-		File logFile = new File(sd, EXPORT_PATH + "/" + LOG_FILENAME);
-		logFile.delete();
-	}
+    //--------------------------------------------------------------
 
-	@SuppressLint("SimpleDateFormat")
-	static private void logIntoFile(String type, String tag, String text)
-	{
-		if (!logIntoFile)
-			return;
+    static private void resetLog()
+    {
+        File sd = Environment.getExternalStorageDirectory();
+        File exportDir = new File(sd, EXPORT_PATH);
+        if (!(exportDir.exists() && exportDir.isDirectory()))
+            exportDir.mkdirs();
 
-		File sd = Environment.getExternalStorageDirectory();
-		File exportDir = new File(sd, EXPORT_PATH);
-		if (!(exportDir.exists() && exportDir.isDirectory()))
-			exportDir.mkdirs();
-		
-		File logFile = new File(sd, EXPORT_PATH + "/" + LOG_FILENAME);
+        File logFile = new File(sd, EXPORT_PATH + "/" + LOG_FILENAME);
+        logFile.delete();
+    }
 
-		if (logFile.length() > 1024 * 10000)
-			resetLog();
+    @SuppressLint("SimpleDateFormat")
+    static private void logIntoFile(String type, String tag, String text)
+    {
+        if (!logIntoFile)
+            return;
 
-	    if (!logFile.exists())
-	    {
-	        try
-	        {
-	            logFile.createNewFile();
-	        } 
-	        catch (IOException e)
-	        {
-	            e.printStackTrace();
-	        }
-	    }
-	    try
-	    {
-	        //BufferedWriter for performance, true to set append to file flag
-	        BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-	        String log = "";
-		    SimpleDateFormat sdf = new SimpleDateFormat("d.MM.yy HH:mm:ss:S");
-		    String time = sdf.format(Calendar.getInstance().getTimeInMillis());
-	        log = log + time + "--" + type + "-----" + tag + "------" + text;
-	        buf.append(log);
-	        buf.newLine();
-	        buf.flush();
-	        buf.close();
-	    }
-	    catch (IOException e)
-	    {
-	        e.printStackTrace();
-	    }		
-	}
+        File sd = Environment.getExternalStorageDirectory();
+        File exportDir = new File(sd, EXPORT_PATH);
+        if (!(exportDir.exists() && exportDir.isDirectory()))
+            exportDir.mkdirs();
 
-	private static boolean logContainsFilterTag(String tag)
-	{
-		boolean contains = false;
-		String[] splits = logFilterTags.split("\\|");
-		for (int i = 0; i < splits.length; i++)
-		{
-			if (tag.contains(splits[i]))
-			{
-				contains = true;
-				break;		
-			}
-		}
-		return contains;
-	}
-	
-	static public void logI(String tag, String text)
-	{
-		if (!(logIntoLogCat || logIntoFile))
-			return;
+        File logFile = new File(sd, EXPORT_PATH + "/" + LOG_FILENAME);
 
-		if (logContainsFilterTag(tag))
-		{
-			if (logIntoLogCat) Log.i(tag, text);
-			logIntoFile("I", tag, text);
-		}
-	}
-	
-	static public void logW(String tag, String text)
-	{
-		if (!(logIntoLogCat || logIntoFile))
-			return;
+        if (logFile.length() > 1024 * 10000)
+            resetLog();
 
-		if (logContainsFilterTag(tag))
-		{
-			if (logIntoLogCat) Log.w(tag, text);
-			logIntoFile("W", tag, text);
-		}
-	}
-	
-	static public void logE(String tag, String text)
-	{
-		if (!(logIntoLogCat || logIntoFile))
-			return;
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.createNewFile();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            String log = "";
+            SimpleDateFormat sdf = new SimpleDateFormat("d.MM.yy HH:mm:ss:S");
+            String time = sdf.format(Calendar.getInstance().getTimeInMillis());
+            log = log + time + "--" + type + "-----" + tag + "------" + text;
+            buf.append(log);
+            buf.newLine();
+            buf.flush();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
-		if (logContainsFilterTag(tag))
-		{
-			if (logIntoLogCat) Log.e(tag, text);
-			logIntoFile("E", tag, text);
-		}
-	}
+    private static boolean logContainsFilterTag(String tag)
+    {
+        boolean contains = false;
+        String[] splits = logFilterTags.split("\\|");
+        for (int i = 0; i < splits.length; i++)
+        {
+            if (tag.contains(splits[i]))
+            {
+                contains = true;
+                break;
+            }
+        }
+        return contains;
+    }
 
-	static public void logD(String tag, String text)
-	{
-		if (!(logIntoLogCat || logIntoFile))
-			return;
+    static public void logI(String tag, String text)
+    {
+        if (!(logIntoLogCat || logIntoFile))
+            return;
 
-		if (logContainsFilterTag(tag))
-		{
-			if (logIntoLogCat) Log.d(tag, text);
-			logIntoFile("D", tag, text);
-		}
-	}
-	
-	//--------------------------------------------------------------
-	
-	
+        if (logContainsFilterTag(tag))
+        {
+            if (logIntoLogCat) Log.i(tag, text);
+            logIntoFile("I", tag, text);
+        }
+    }
+
+    static public void logW(String tag, String text)
+    {
+        if (!(logIntoLogCat || logIntoFile))
+            return;
+
+        if (logContainsFilterTag(tag))
+        {
+            if (logIntoLogCat) Log.w(tag, text);
+            logIntoFile("W", tag, text);
+        }
+    }
+
+    static public void logE(String tag, String text)
+    {
+        if (!(logIntoLogCat || logIntoFile))
+            return;
+
+        if (logContainsFilterTag(tag))
+        {
+            if (logIntoLogCat) Log.e(tag, text);
+            logIntoFile("E", tag, text);
+        }
+    }
+
+    static public void logD(String tag, String text)
+    {
+        if (!(logIntoLogCat || logIntoFile))
+            return;
+
+        if (logContainsFilterTag(tag))
+        {
+            if (logIntoLogCat) Log.d(tag, text);
+            logIntoFile("D", tag, text);
+        }
+    }
+
+    //--------------------------------------------------------------
+
+
 }
