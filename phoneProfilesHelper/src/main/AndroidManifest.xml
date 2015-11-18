@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="sk.henrichg.phoneprofileshelper"
-    android:versionCode="52"
+    android:versionCode="53"
     android:versionName="1.0" >
 
 <!--
@@ -43,16 +43,16 @@
             android:taskAffinity="sk.henrichg.phoneprofileshelper"
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-		    <intent-filter>
-		        <action android:name="phoneprofileshelper.intent.action.START"/>
-		        <category android:name="android.intent.category.DEFAULT"/>
-		    </intent-filter>
-		</activity>
+            <intent-filter>
+                <action android:name="phoneprofileshelper.intent.action.START"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
 
-	    <service android:name=".ReceiversService">
+        <service android:name=".ReceiversService">
         </service>
         
-	    <service android:name=".SetProfilePreferenceService">
+        <service android:name=".SetProfilePreferenceService">
         </service>
         
         <receiver
