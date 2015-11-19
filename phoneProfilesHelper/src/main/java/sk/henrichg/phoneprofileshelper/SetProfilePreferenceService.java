@@ -72,7 +72,7 @@ public class SetProfilePreferenceService extends IntentService
 
         context = getBaseContext();
 
-        SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","-- start --------------------------------");
+        SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent", "-- start --------------------------------");
 
         String	procedure = intent.getStringExtra (PROCEDURE);
         SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","procedure="+procedure);
@@ -101,7 +101,7 @@ public class SetProfilePreferenceService extends IntentService
 
         PPHeplerBroadcastReceiver.completeWakefulIntent(intent);
 
-        SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","-- end --------------------------------");
+        SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent", "-- end --------------------------------");
 
     }
     
@@ -326,8 +326,14 @@ public class SetProfilePreferenceService extends IntentService
         if (hardwareCheck(PREF_PROFILE_DEVICE_GPS))
         {
             SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","gps="+GPSChange);
-            String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","gps  provider="+provider);
+
+            //String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            //SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","gps  provider="+provider);
+
+            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            boolean isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","isEnabled="+isEnabled);
+
 
             //Log.d("ActivateProfileHelper.execute", provider);
 
@@ -339,12 +345,12 @@ public class SetProfilePreferenceService extends IntentService
                     setGPS(false);
                     break;
                 case 3 :
-                    if (!provider.contains("gps"))
+                    if (!isEnabled)
                     {
                         setGPS(true);
                     }
                     else
-                    if (provider.contains("gps"))
+                    if (isEnabled)
                     {
                         setGPS(false);
                     }
@@ -826,30 +832,36 @@ public class SetProfilePreferenceService extends IntentService
     {
         if (enable)
         {
-            String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             String newSet;
-            if (provider.equals(""))
-                newSet = LocationManager.GPS_PROVIDER;
+            if (android.os.Build.VERSION.SDK_INT < 23) {
+                String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+                if (provider.equals(""))
+                    newSet = LocationManager.GPS_PROVIDER;
+                else
+                    newSet = String.format("%s,%s", provider, LocationManager.GPS_PROVIDER);
+            }
             else
-                newSet = String.format("%s,%s", provider, LocationManager.GPS_PROVIDER);
+                newSet = "+gps";
             Settings.Secure.putString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newSet);
         }
         else
         {
-            String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            String[] list = provider.split(",");
             String newSet = "";
-            int j = 0;
-            for (int i = 0; i < list.length; i++)
-            {
-                if  (!list[i].equals(LocationManager.GPS_PROVIDER))
-                {
-                    if (j > 0)
-                        newSet += ",";
-                    newSet += list[i];
-                    j++;
+            if (android.os.Build.VERSION.SDK_INT < 23) {
+                String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+                String[] list = provider.split(",");
+                int j = 0;
+                for (int i = 0; i < list.length; i++) {
+                    if (!list[i].equals(LocationManager.GPS_PROVIDER)) {
+                        if (j > 0)
+                            newSet += ",";
+                        newSet += list[i];
+                        j++;
+                    }
                 }
             }
+            else
+                newSet = "-gps";
             Settings.Secure.putString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newSet);
         }
     }
