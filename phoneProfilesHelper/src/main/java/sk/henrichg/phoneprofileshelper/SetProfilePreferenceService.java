@@ -112,7 +112,7 @@ public class SetProfilePreferenceService extends IntentService
 
         boolean _isAirplaneMode = false;
         boolean _setAirplaneMode = false;
-        if (hardwareCheck(PREF_PROFILE_DEVICE_AIRPLANE_MODE))
+        if (isPreferenceAllowed(PREF_PROFILE_DEVICE_AIRPLANE_MODE))
         {
             _isAirplaneMode = isAirplaneMode();
             switch (airplaneModeChange) {
@@ -160,7 +160,7 @@ public class SetProfilePreferenceService extends IntentService
         }
 
         // nahodenie mobilnych dat
-        if (hardwareCheck(PREF_PROFILE_DEVICE_MOBILE_DATA))
+        if (isPreferenceAllowed(PREF_PROFILE_DEVICE_MOBILE_DATA))
         {
             SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","mobile data");
             boolean _isMobileData = isMobileData();
@@ -199,7 +199,7 @@ public class SetProfilePreferenceService extends IntentService
 
         // nahodenie WiFi AP
         boolean canChangeWifi = true;
-        if (hardwareCheck(PREF_PROFILE_DEVICE_WIFI_AP))
+        if (isPreferenceAllowed(PREF_PROFILE_DEVICE_WIFI_AP))
         {
             WifiApManager wifiApManager = null;
             try {
@@ -244,7 +244,7 @@ public class SetProfilePreferenceService extends IntentService
 
         if (canChangeWifi) {
             // nahodenie WiFi
-            if (hardwareCheck(PREF_PROFILE_DEVICE_WIFI)) {
+            if (isPreferenceAllowed(PREF_PROFILE_DEVICE_WIFI)) {
                 SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios", "wifi");
                 if (!WifiApManager.isWifiAPEnabled(context)) { // only when wifi AP is not enabled, change wifi
                     WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -287,7 +287,7 @@ public class SetProfilePreferenceService extends IntentService
         }
 
         // nahodenie bluetooth
-        if (hardwareCheck(PREF_PROFILE_DEVICE_BLUETOOTH))
+        if (isPreferenceAllowed(PREF_PROFILE_DEVICE_BLUETOOTH))
         {
             SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","bluetooth");
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -323,7 +323,7 @@ public class SetProfilePreferenceService extends IntentService
         }
 
         // nahodenie GPS
-        if (hardwareCheck(PREF_PROFILE_DEVICE_GPS))
+        if (isPreferenceAllowed(PREF_PROFILE_DEVICE_GPS))
         {
             SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","gps="+GPSChange);
 
@@ -359,7 +359,7 @@ public class SetProfilePreferenceService extends IntentService
         }
 
         // nahodenie NFC
-        if (hardwareCheck(PREF_PROFILE_DEVICE_NFC))
+        if (isPreferenceAllowed(PREF_PROFILE_DEVICE_NFC))
         {
             SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","nfc");
             NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
@@ -390,7 +390,7 @@ public class SetProfilePreferenceService extends IntentService
     }
 
     
-    private boolean hardwareCheck(String preferenceKey)
+    private boolean isPreferenceAllowed(String preferenceKey)
     {
         //long nanoTimeStart = startMeasuringRunTime();
 
