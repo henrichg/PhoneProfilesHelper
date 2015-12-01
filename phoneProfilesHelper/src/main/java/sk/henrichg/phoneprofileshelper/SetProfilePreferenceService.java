@@ -330,8 +330,13 @@ public class SetProfilePreferenceService extends IntentService
             //String provider = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             //SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","gps  provider="+provider);
 
-            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-            boolean isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean isEnabled;
+            if (android.os.Build.VERSION.SDK_INT < 21)
+                isEnabled = Settings.Secure.isLocationProviderEnabled(context.getContentResolver(), LocationManager.GPS_PROVIDER);
+            else {
+                LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+                isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            }
             SystemRoutines.logE("SetProfilePreferenceService.doExecuteForRadios","isEnabled="+isEnabled);
 
 
