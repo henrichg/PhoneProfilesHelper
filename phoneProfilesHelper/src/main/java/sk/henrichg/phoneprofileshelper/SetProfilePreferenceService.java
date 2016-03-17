@@ -3,7 +3,9 @@ package sk.henrichg.phoneprofileshelper;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
+import com.stericson.RootShell.RootShell;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootShell.execution.Command;
 import com.stericson.RootShell.execution.Shell;
@@ -21,6 +23,7 @@ import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -35,6 +38,7 @@ public class SetProfilePreferenceService extends IntentService
     int bluetoothChange = 0;
     int mobileDataChange = 0;
     int WifiAPChange = 0;
+    int networkTypeChange = 0;
 
     public static final String PROCEDURE = "procedure";
 
@@ -47,6 +51,7 @@ public class SetProfilePreferenceService extends IntentService
     public static final String BLUETOOTH_CHANGE = "bluetoothChange";
     public static final String MOBILE_DATA_CHANGE = "mobileDataChange";
     public static final String WIFI_AP_CHANGE = "WiFiAPChange";
+    public static final String NETWORK_TYPE_CHANGE = "networkTypeChange";
 
     private static final String PREF_PROFILE_DEVICE_GPS = "prf_pref_deviceGPS";
     private static final String PREF_PROFILE_DEVICE_AIRPLANE_MODE = "prf_pref_deviceAirplaneMode";
@@ -55,6 +60,7 @@ public class SetProfilePreferenceService extends IntentService
     private static final String PREF_PROFILE_DEVICE_BLUETOOTH = "prf_pref_deviceBluetooth";
     private static final String PREF_PROFILE_DEVICE_MOBILE_DATA = "prf_pref_deviceMobileData";
     private static final String PREF_PROFILE_DEVICE_WIFI_AP = "prf_pref_deviceWiFiAP";
+    private static final String PREF_PROFILE_DEVICE_NETWORK_TYPE = "prf_pref_deviceNetworkType";
 
     // for synchronization between wifi/bluetooth scanner, local radio changes and PPHelper radio changes
     static final String RADIO_CHANGE_PREFS_NAME = "sk.henrichg.phoneprofiles.radio_change";
@@ -86,6 +92,7 @@ public class SetProfilePreferenceService extends IntentService
             bluetoothChange = intent.getIntExtra(BLUETOOTH_CHANGE, 0);
             mobileDataChange = intent.getIntExtra(MOBILE_DATA_CHANGE, 0);
             WifiAPChange = intent.getIntExtra(WIFI_AP_CHANGE, 0);
+            networkTypeChange = intent.getIntExtra(NETWORK_TYPE_CHANGE, 0);
 
             SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","GPSChange="+GPSChange);
             SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","airplaneModeChange="+airplaneModeChange);
@@ -94,6 +101,7 @@ public class SetProfilePreferenceService extends IntentService
             SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","bluetoothChange="+bluetoothChange);
             SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","mobileDataChange="+mobileDataChange);
             SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","WifiAPChange="+WifiAPChange);
+            SystemRoutines.logE("SetProfilePreferenceService.onHandleIntent","networkTypeChange="+networkTypeChange);
 
             executeForRadios();
         }
@@ -157,6 +165,19 @@ public class SetProfilePreferenceService extends IntentService
             Thread.sleep(300);
         } catch (InterruptedException e) {
             System.out.println(e);
+        }
+
+        // nahodenie network type
+        if (isPreferenceAllowed(PREF_PROFILE_DEVICE_NETWORK_TYPE))
+        {
+            if (networkTypeChange >= 100) {
+                setPreferredNetworkType(networkTypeChange - 100);
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                }
+            }
         }
 
         // nahodenie mobilnych dat
@@ -453,6 +474,17 @@ public class SetProfilePreferenceService extends IntentService
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI))
                 // device ma Wifi
                 featurePresented = true;
+        }
+        else
+        if (preferenceKey.equals(PREF_PROFILE_DEVICE_NETWORK_TYPE))
+        {
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY))
+            {
+                // device ma mobilne data
+                if (canSetPreferredNetworkType())
+                    featurePresented = true;
+            }
+
         }
         else
             featurePresented = true;
@@ -922,6 +954,83 @@ public class SetProfilePreferenceService extends IntentService
         }
     }
 
+    private boolean canSetPreferredNetworkType()
+    {
+        final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        final int phoneType = telephonyManager.getPhoneType();
+        if ((phoneType == TelephonyManager.PHONE_TYPE_GSM) || (phoneType == TelephonyManager.PHONE_TYPE_CDMA)) {
+            if (serviceBinaryExists())
+                return true;
+        }
+        return false;
+    }
+
+    private String getTransactionCode(Context context, String fieldName) throws Exception {
+        try {
+            final TelephonyManager mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            final Class<?> mTelephonyClass = Class.forName(mTelephonyManager.getClass().getName());
+            final Method mTelephonyMethod = mTelephonyClass.getDeclaredMethod("getITelephony");
+            mTelephonyMethod.setAccessible(true);
+            final Object mTelephonyStub = mTelephonyMethod.invoke(mTelephonyManager);
+            final Class<?> mTelephonyStubClass = Class.forName(mTelephonyStub.getClass().getName());
+            final Class<?> mClass = mTelephonyStubClass.getDeclaringClass();
+            final Field field = mClass.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return String.valueOf(field.getInt(null));
+        } catch (Exception e) {
+            // The "TRANSACTION_setDataEnabled" field is not available,
+            // or named differently in the current API level, so we throw
+            // an exception and inform users that the method is not available.
+            throw e;
+        }
+    }
+
+    private void setPreferredNetworkType(int networkType) {
+        try {
+            // Get the value of the "TRANSACTION_setPreferredNetworkType" field.
+            String transactionCode = getTransactionCode(context, "TRANSACTION_setPreferredNetworkType");
+            if (Build.VERSION.SDK_INT >= 23) {
+                SubscriptionManager mSubscriptionManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+                // Loop through the subscription list i.e. SIM list.
+                for (int i = 0; i < mSubscriptionManager.getActiveSubscriptionInfoCountMax(); i++) {
+                    if (transactionCode != null && transactionCode.length() > 0) {
+                        // Get the active subscription ID for a given SIM card.
+                        int subscriptionId = mSubscriptionManager.getActiveSubscriptionInfoList().get(i).getSubscriptionId();
+                        String command1 = "service call phone " + transactionCode + " i32 " + subscriptionId + " i32 " + networkType;
+                        Command command = new Command(0, false, command1);
+                        try {
+                            RootTools.getShell(true, Shell.ShellContext.SYSTEM_APP).add(command);
+                            commandWait(command);
+                            //RootTools.closeAllShells();
+                        } catch (Exception e) {
+                            Log.e("SetProfilePreferenceService.setPreferredNetworkType", "Error on run su");
+                        }
+                    }
+                }
+            } else  {
+                if (transactionCode != null && transactionCode.length() > 0) {
+                    String command1 = "service call phone " + transactionCode + " i32 " + networkType;
+                    Command command = new Command(0, false, command1);
+                    try {
+                        RootTools.getShell(true, Shell.ShellContext.SYSTEM_APP).add(command);
+                        commandWait(command);
+                        //RootTools.closeAllShells();
+                    } catch (Exception e) {
+                        Log.e("SetProfilePreferenceService.setPreferredNetworkType", "Error on run su");
+                    }
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    static boolean serviceBinaryExists()
+    {
+        List<String> servicePaths = RootTools.findBinary("service");
+        return servicePaths.size() > 0;
+    }
 
     private void commandWait(Command cmd) throws Exception {
         int waitTill = 50;
