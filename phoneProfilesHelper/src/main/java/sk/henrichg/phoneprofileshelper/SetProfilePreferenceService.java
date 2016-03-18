@@ -959,13 +959,13 @@ public class SetProfilePreferenceService extends IntentService
         final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         final int phoneType = telephonyManager.getPhoneType();
         if ((phoneType == TelephonyManager.PHONE_TYPE_GSM) || (phoneType == TelephonyManager.PHONE_TYPE_CDMA)) {
-            if (serviceBinaryExists())
+            if (serviceBinaryExists() && telephonyServiceExists(context, "TRANSACTION_setPreferredNetworkType"))
                 return true;
         }
         return false;
     }
 
-    private String getTransactionCode(Context context, String fieldName) throws Exception {
+    private static String getTransactionCode(Context context, String fieldName) throws Exception {
         try {
             final TelephonyManager mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             final Class<?> mTelephonyClass = Class.forName(mTelephonyManager.getClass().getName());
@@ -1030,6 +1030,21 @@ public class SetProfilePreferenceService extends IntentService
     {
         List<String> servicePaths = RootTools.findBinary("service");
         return servicePaths.size() > 0;
+    }
+
+    static boolean telephonyServiceExists(Context context, String preference) {
+        try {
+            if (preference.equals(PREF_PROFILE_DEVICE_MOBILE_DATA)) {
+                String s = getTransactionCode(context, "TRANSACTION_setDataEnabled");
+            }
+            else
+            if (preference.equals(PREF_PROFILE_DEVICE_NETWORK_TYPE)) {
+                String s = getTransactionCode(context, "TRANSACTION_getPreferredNetworkType");
+            }
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
     }
 
     private void commandWait(Command cmd) throws Exception {
