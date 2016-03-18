@@ -959,7 +959,7 @@ public class SetProfilePreferenceService extends IntentService
         final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         final int phoneType = telephonyManager.getPhoneType();
         if ((phoneType == TelephonyManager.PHONE_TYPE_GSM) || (phoneType == TelephonyManager.PHONE_TYPE_CDMA)) {
-            if (serviceBinaryExists() && telephonyServiceExists(context, "TRANSACTION_setPreferredNetworkType"))
+            if (serviceBinaryExists() && telephonyServiceExists(context, PREF_PROFILE_DEVICE_NETWORK_TYPE))
                 return true;
         }
         return false;
@@ -1039,7 +1039,7 @@ public class SetProfilePreferenceService extends IntentService
             }
             else
             if (preference.equals(PREF_PROFILE_DEVICE_NETWORK_TYPE)) {
-                String s = getTransactionCode(context, "TRANSACTION_getPreferredNetworkType");
+                String s = getTransactionCode(context, "TRANSACTION_setPreferredNetworkType");
             }
             return true;
         } catch(Exception e) {
