@@ -515,7 +515,10 @@ public class SetProfilePreferenceService extends IntentService
     @SuppressLint("NewApi")
     private void setAirplaneMode_SDK17(boolean mode)
     {
-        if (RootTools.isAccessGiven()) {
+        boolean isRooted = RootTools.isRootAvailable();
+        if (!isRooted)
+            isRooted = RootTools.isAccessGiven();
+        if (isRooted) {
 
             String command;
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -988,7 +991,10 @@ public class SetProfilePreferenceService extends IntentService
     }
 
     private void setPreferredNetworkType(int networkType) {
-        if (RootTools.isAccessGiven()) {
+        boolean isRooted = RootTools.isRootAvailable();
+        if (!isRooted)
+            isRooted = RootTools.isAccessGiven();
+        if (isRooted) {
             try {
                 // Get the value of the "TRANSACTION_setPreferredNetworkType" field.
                 String transactionCode = getTransactionCode(context, "TRANSACTION_setPreferredNetworkType");
@@ -1031,7 +1037,10 @@ public class SetProfilePreferenceService extends IntentService
 
     static boolean serviceBinaryExists()
     {
-        if (RootTools.isAccessGiven()) {
+        boolean isRooted = RootTools.isRootAvailable();
+        if (!isRooted)
+            isRooted = RootTools.isAccessGiven();
+        if (isRooted) {
             List<String> servicePaths = RootTools.findBinary("service");
             return servicePaths.size() > 0;
         }
