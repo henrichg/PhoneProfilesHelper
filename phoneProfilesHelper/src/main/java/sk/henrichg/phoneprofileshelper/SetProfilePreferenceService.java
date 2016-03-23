@@ -515,40 +515,42 @@ public class SetProfilePreferenceService extends IntentService
     @SuppressLint("NewApi")
     private void setAirplaneMode_SDK17(boolean mode)
     {
+        if (RootTools.isAccessGiven()) {
 
-        String command;
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-            Settings.Global.putInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, mode ? 1 : 0);
-        else
-            Settings.System.putInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, mode ? 1 : 0);
-        /*if (android.os.Build.VERSION.SDK_INT < 18)
-        {
-            // Not working in Android 4.3+ (SecurityException :-/ )
-            Intent intentBr = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            intentBr.putExtra("state", mode);
-            context.sendBroadcast(intentBr);
-        }
-        else
-        {*/
-            //SystemRoutines.getSUVersion();
-            // This shows grant root privileges dialog :-/
-            if (mode)
-                command = "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true";
+            String command;
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+                Settings.Global.putInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, mode ? 1 : 0);
             else
-                command = "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false";
-            //if (SystemRoutines.isSELinuxEnforcing())
-            //{
-            //	command = SystemRoutines.getSELinuxEnforceCommand(command, Shell.ShellContext.SYSTEM_APP);
-            //}
-            Command commandCapture = new Command(0, false, command);
-            try {
-                RootTools.getShell(true, Shell.ShellContext.SYSTEM_APP).add(commandCapture);
-                commandWait(commandCapture);
-                //RootTools.closeAllShells();
-            } catch (Exception e) {
-                Log.e("SetProfilePreferenceService.setAirplaneMode_SDK17", "Error on run su");
+                Settings.System.putInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, mode ? 1 : 0);
+            /*if (android.os.Build.VERSION.SDK_INT < 18)
+            {
+                // Not working in Android 4.3+ (SecurityException :-/ )
+                Intent intentBr = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+                intentBr.putExtra("state", mode);
+                context.sendBroadcast(intentBr);
             }
-        /*}*/
+            else
+            {*/
+                //SystemRoutines.getSUVersion();
+                // This shows grant root privileges dialog :-/
+                if (mode)
+                    command = "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true";
+                else
+                    command = "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false";
+                //if (SystemRoutines.isSELinuxEnforcing())
+                //{
+                //	command = SystemRoutines.getSELinuxEnforceCommand(command, Shell.ShellContext.SYSTEM_APP);
+                //}
+                Command commandCapture = new Command(0, false, command);
+                try {
+                    RootTools.getShell(true, Shell.ShellContext.SYSTEM_APP).add(commandCapture);
+                    commandWait(commandCapture);
+                    //RootTools.closeAllShells();
+                } catch (Exception e) {
+                    Log.e("SetProfilePreferenceService.setAirplaneMode_SDK17", "Error on run su");
+                }
+            /*}*/
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -986,17 +988,31 @@ public class SetProfilePreferenceService extends IntentService
     }
 
     private void setPreferredNetworkType(int networkType) {
-        try {
-            // Get the value of the "TRANSACTION_setPreferredNetworkType" field.
-            String transactionCode = getTransactionCode(context, "TRANSACTION_setPreferredNetworkType");
-            if (Build.VERSION.SDK_INT >= 23) {
-                SubscriptionManager mSubscriptionManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-                // Loop through the subscription list i.e. SIM list.
-                for (int i = 0; i < mSubscriptionManager.getActiveSubscriptionInfoCountMax(); i++) {
+        if (RootTools.isAccessGiven()) {
+            try {
+                // Get the value of the "TRANSACTION_setPreferredNetworkType" field.
+                String transactionCode = getTransactionCode(context, "TRANSACTION_setPreferredNetworkType");
+                if (Build.VERSION.SDK_INT >= 23) {
+                    SubscriptionManager mSubscriptionManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+                    // Loop through the subscription list i.e. SIM list.
+                    for (int i = 0; i < mSubscriptionManager.getActiveSubscriptionInfoCountMax(); i++) {
+                        if (transactionCode != null && transactionCode.length() > 0) {
+                            // Get the active subscription ID for a given SIM card.
+                            int subscriptionId = mSubscriptionManager.getActiveSubscriptionInfoList().get(i).getSubscriptionId();
+                            String command1 = "service call phone " + transactionCode + " i32 " + subscriptionId + " i32 " + networkType;
+                            Command command = new Command(0, false, command1);
+                            try {
+                                RootTools.getShell(true, Shell.ShellContext.SYSTEM_APP).add(command);
+                                commandWait(command);
+                                //RootTools.closeAllShells();
+                            } catch (Exception e) {
+                                Log.e("SetProfilePreferenceService.setPreferredNetworkType", "Error on run su");
+                            }
+                        }
+                    }
+                } else {
                     if (transactionCode != null && transactionCode.length() > 0) {
-                        // Get the active subscription ID for a given SIM card.
-                        int subscriptionId = mSubscriptionManager.getActiveSubscriptionInfoList().get(i).getSubscriptionId();
-                        String command1 = "service call phone " + transactionCode + " i32 " + subscriptionId + " i32 " + networkType;
+                        String command1 = "service call phone " + transactionCode + " i32 " + networkType;
                         Command command = new Command(0, false, command1);
                         try {
                             RootTools.getShell(true, Shell.ShellContext.SYSTEM_APP).add(command);
@@ -1007,29 +1023,20 @@ public class SetProfilePreferenceService extends IntentService
                         }
                     }
                 }
-            } else  {
-                if (transactionCode != null && transactionCode.length() > 0) {
-                    String command1 = "service call phone " + transactionCode + " i32 " + networkType;
-                    Command command = new Command(0, false, command1);
-                    try {
-                        RootTools.getShell(true, Shell.ShellContext.SYSTEM_APP).add(command);
-                        commandWait(command);
-                        //RootTools.closeAllShells();
-                    } catch (Exception e) {
-                        Log.e("SetProfilePreferenceService.setPreferredNetworkType", "Error on run su");
-                    }
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch(Exception e) {
-            e.printStackTrace();
         }
-
     }
 
     static boolean serviceBinaryExists()
     {
-        List<String> servicePaths = RootTools.findBinary("service");
-        return servicePaths.size() > 0;
+        if (RootTools.isAccessGiven()) {
+            List<String> servicePaths = RootTools.findBinary("service");
+            return servicePaths.size() > 0;
+        }
+        else
+            return false;
     }
 
     private void commandWait(Command cmd) throws Exception {
