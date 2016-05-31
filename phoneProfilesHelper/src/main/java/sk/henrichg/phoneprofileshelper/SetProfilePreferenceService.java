@@ -999,7 +999,7 @@ public class SetProfilePreferenceService extends IntentService
                 // Get the value of the "TRANSACTION_setPreferredNetworkType" field.
                 String transactionCode = getTransactionCode(context, "TRANSACTION_setPreferredNetworkType");
                 if (Build.VERSION.SDK_INT >= 23) {
-                    SubscriptionManager mSubscriptionManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+                    SubscriptionManager mSubscriptionManager = SubscriptionManager.from(context);
                     // Loop through the subscription list i.e. SIM list.
                     for (int i = 0; i < mSubscriptionManager.getActiveSubscriptionInfoCountMax(); i++) {
                         if (transactionCode != null && transactionCode.length() > 0) {
