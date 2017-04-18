@@ -866,7 +866,6 @@ public class SetProfilePreferenceService extends IntentService
             }
 
         }
-
     }
 
     @SuppressWarnings("deprecation")
